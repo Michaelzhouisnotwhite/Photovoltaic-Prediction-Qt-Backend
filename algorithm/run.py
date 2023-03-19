@@ -148,7 +148,7 @@ def do_args(args: argparse.ArgumentParser):
     if args.is_training:
         for ii in range(args.itr):
             # setting record of experiments
-            setting = f'{args.model}_{args.data}_{args.seq_len}_{args.label_len}_{args.pred_len}'
+            setting = f'LWLRformer_{args.model}_{args.data}_{args.seq_len}_{args.label_len}_{args.pred_len}'
             log_dir = os.path.join('./test_results', setting)
             if not os.path.exists(log_dir):
                 os.makedirs(log_dir)

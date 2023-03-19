@@ -4,7 +4,7 @@ import os
 import pandas as pd
 import torch
 from exp.exp_main import Exp_Main
-
+from settings import __CHECKPOINTS_DIR__, __RESULT_DIR__
 import random
 import numpy as np
 import pandas
@@ -23,7 +23,7 @@ def get_parser():
     # basic config
     parser.add_argument('--is_training', type=int, default=1, help='status')
     parser.add_argument('--model_id', type=str, default='', help='model id')
-    parser.add_argument('--model', type=str, default='Myformer',
+    parser.add_argument('--model', type=str, default='LWLRformer',
                         help='model name, options: [DLinear, Informer, FEDformer, Transformer]')
 
     # data loader
@@ -39,7 +39,7 @@ def get_parser():
     parser.add_argument('--freq', type=str, default='t',
                         help='freq for time features encoding, options:[s:secondly, t:minutely, h:hourly, d:daily, b:business days, w:weekly, m:monthly], you can also use more detailed freq like 15min or 3h')
     parser.add_argument('--checkpoints', type=str,
-                        default='./checkpoints/', help='location of model checkpoints')
+                        default=__CHECKPOINTS_DIR__, help='location of model checkpoints')
 
     # forecasting task
     parser.add_argument('--seq_len', type=int, default=96,
@@ -101,8 +101,8 @@ def get_parser():
                         help='data loader num workers')
     parser.add_argument('--itr', type=int, default=1, help='experiments times')
     parser.add_argument('--train_epochs', type=int,
-                        default=1, help='train epochs')
-    parser.add_argument('--batch_size', type=int, default=32,
+                        default=15, help='train epochs')
+    parser.add_argument('--batch_size', type=int, default=10,
                         help='batch size of train input data')
     parser.add_argument('--patience', type=int, default=3,
                         help='early stopping patience')
@@ -134,7 +134,7 @@ def do_args(args: argparse.ArgumentParser):
         device_ids = args.devices.split(',')
         args.device_ids = [int(id_) for id_ in device_ids]
         args.gpu = args.device_ids[0]
-
+    args.label_len = args.seq_len // 2
     Exp = Exp_Main
 
     print(args.data_path)
@@ -148,8 +148,8 @@ def do_args(args: argparse.ArgumentParser):
     if args.is_training:
         for ii in range(args.itr):
             # setting record of experiments
-            setting = f'{args.model}_{args.data}_{args.seq_len}_{args.label_len}_{args.pred_len}'
-            log_dir = os.path.join('./test_results', setting)
+            setting = f'LWLRformer_{args.data}_{args.seq_len}_{args.label_len}_{args.pred_len}'
+            log_dir = os.path.join(__RESULT_DIR__, setting)
             if not os.path.exists(log_dir):
                 os.makedirs(log_dir)
             logger = create_logger(os.path.join(log_dir, 'train.log'))

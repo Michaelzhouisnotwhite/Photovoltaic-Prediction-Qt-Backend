@@ -4,6 +4,7 @@ from exp.exp_basic import Exp_Basic
 from models import Informer, Autoformer, Transformer, FEDformer, Myformer, WaveMapNet
 from utils.tools import EarlyStopping, adjust_learning_rate, visual
 from utils.metrics import metric
+from settings import __CHECKPOINTS_DIR__, __RESULT_DIR__
 import numpy as np
 import torch
 import torch.nn as nn
@@ -30,7 +31,7 @@ class Exp_Main(Exp_Basic):
             'Transformer': Transformer,
             'Informer': Informer,
             'FEDformer': FEDformer,
-            'Myformer': Myformer,
+            'LWLRformer': Myformer,
             'WaveMapNet': WaveMapNet
         }
         model = model_dict[self.args.model].Model(self.args).float()
@@ -213,11 +214,11 @@ class Exp_Main(Exp_Basic):
         if test:
             print('loading model')
             self.model.load_state_dict(torch.load(os.path.join(
-                './checkpoints/' + setting, 'checkpoint.pth')))
+                __CHECKPOINTS_DIR__, setting, 'checkpoint.pth')))
 
         preds = []
         trues = []
-        folder_path = './test_results/' + setting + '/'
+        folder_path = os.path.join(__RESULT_DIR__, setting)
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
 
@@ -274,7 +275,7 @@ class Exp_Main(Exp_Basic):
                     pred = pred * std + mean
                     gt = np.concatenate((input[0, :, -1], true[0, :, -1]), axis=0)
                     pd = np.concatenate((input[0, :, -1], pred[0, :, -1]), axis=0)
-                    visual(gt, pd, os.path.join(folder_path, self.args.model+'-' + str(i) + '.pdf'))
+                    visual(gt, pd, os.path.join(folder_path, self.args.model + '-' + str(i) + '.pdf'))
 
         preds = np.array(preds)
         trues = np.array(trues)
@@ -284,23 +285,23 @@ class Exp_Main(Exp_Basic):
         print('test shape:', preds.shape, trues.shape)
 
         # result save
-        folder_path = './results/' + setting + '/'
+        folder_path = os.path.join(__RESULT_DIR__, setting)
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
 
         mae, mse, _, _, _ = metric(preds, trues)
         logger.info('mse:{}, mae:{}'.format(mse, mae))
-        f = open(f"result-{self.args.model}-{self.args.data}.txt", 'a')
+        f = open(os.path.join(folder_path, f"result-{self.args.model}-{self.args.data}.txt"), 'a')
         f.write(setting + "  \n")
         f.write('mse:{}, mae:{}'.format(mse, mae))
         f.write('\n')
         f.write('\n')
         f.close()
 
-        np.save(folder_path + 'metrics.npy',
+        np.save(os.path.join(folder_path, 'metrics.npy'),
                 np.array([mae, mse]))
-        np.save(folder_path + 'pred.npy', preds)
-        np.save(folder_path + 'true.npy', trues)
+        np.save(os.path.join(folder_path, 'pred.npy'), preds)
+        np.save(os.path.join(folder_path, 'true.npy'), trues)
 
         return
 
@@ -309,7 +310,7 @@ class Exp_Main(Exp_Basic):
 
         if load:
             path = os.path.join(self.args.checkpoints, setting)
-            best_model_path = path + '/' + 'checkpoint.pth'
+            best_model_path = os.path.join(path, 'checkpoint.pth')
             self.model.load_state_dict(torch.load(best_model_path))
 
         preds = []
@@ -350,10 +351,10 @@ class Exp_Main(Exp_Basic):
         preds = preds.reshape(-1, preds.shape[-2], preds.shape[-1])
 
         # result save
-        folder_path = './results/' + setting + '/'
+        folder_path = os.path.join(__RESULT_DIR__, setting)
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
 
-        np.save(folder_path + 'real_prediction.npy', preds)
+        np.save(os.path.join(folder_path, 'real_prediction.npy'), preds)
 
         return

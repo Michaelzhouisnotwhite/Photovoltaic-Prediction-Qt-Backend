@@ -10,7 +10,7 @@ from starlette.responses import FileResponse
 import py7zr
 
 from algorithm.run import get_args_from_list
-from settings import (__DEV_ENV__, __USER_CONFIG_FILE_NAME__,
+from settings import (__DEV_ENV__, __USER_CONFIG_FILE_NAME__, __RESULT_DIR__,
                       __USER_DATASET_DIR__, __DB_DIR__)
 
 app = FastAPI()
@@ -61,22 +61,27 @@ def start_train(namespace: str):
         "--root_path", user_data_path,
         "--data_path", config_json["target_file"],
         "--data", namespace,
-        "--seq_len", config_json["train_seq_len"],
-        "--pred_len", config_json["predict_len"]
+        "--seq_len", str(config_json["train_seq_len"]),
+        "--pred_len", str(config_json["predict_len"]),
+        "--train_epochs", f"{1}"
     ])
     return {"message": "training end", "code": 200}
 
 
 @app.get("/list-dir/{namespace}")
 def list_dir(namespace: str):
-    user_data_path = os.path.join(__USER_DATASET_DIR__, namespace)
-    if not os.path.exists(user_data_path):
-        return {"code": 405, "message": "namespace doesn't exists"}
+    user_result_folder_name = ""
+    # TODO: 找到用户结果目录
+    for items in os.listdir(__RESULT_DIR__):
+        if items.find(namespace) != -1:
+            user_result_folder_name = items
+
+    if not os.path.exists(os.path.join(__RESULT_DIR__, user_result_folder_name)):
+        return {"code": 405, "message": "命名空间不存在，请等待训练或仔细检查命名空间"}
     res = []
-    for file_item in os.listdir(user_data_path):
-        res.append([file_item, os.path.getsize(os.path.join(user_data_path, file_item))])
-    dir_list = dict(train_result=res, test_empty=[])
-    return {"code": 200, "data": dir_list}
+    for file_item in os.listdir(os.path.join(__RESULT_DIR__, user_result_folder_name)):
+        res.append([file_item, os.path.getsize(os.path.join(__RESULT_DIR__, user_result_folder_name, file_item))])
+    return {"code": 200, "data": {user_result_folder_name: res}}
 
 
 class DownloadFilesInfo(BaseModel):
@@ -88,10 +93,12 @@ class DownloadFilesInfo(BaseModel):
 def download_files(target_files_info: DownloadFilesInfo):
     with py7zr.SevenZipFile(f"{__DB_DIR__}/{target_files_info.namespace}.7z", "w") as archive:
         for file_name in target_files_info.relative_paths:
-            archive.write(os.path.join(__USER_DATASET_DIR__, target_files_info.namespace, file_name))
+            file_path = os.path.join(__RESULT_DIR__, file_name)
+            if os.path.exists(file_path):
+                archive.write(os.path.join(__RESULT_DIR__, file_name), arcname=file_name)
 
     return FileResponse(path=f"{__DB_DIR__}/{target_files_info.namespace}.7z",
-                        filename=f"{target_files_info.namespace}.7z")
+                        filename=f"{target_files_info.namespace}.7z", background=os.remove(f"{__DB_DIR__}/{target_files_info.namespace}.7z"))
 
 
 @app.post("/upload-file/")

@@ -1,0 +1,5 @@
+{
+    "namespace": "michael",
+    "train_seq_len": 96,
+    "predict_len": 10
+}

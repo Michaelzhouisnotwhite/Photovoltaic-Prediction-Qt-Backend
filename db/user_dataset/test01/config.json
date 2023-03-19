@@ -1,0 +1,6 @@
+{
+    "namespace": "test01",
+    "train_seq_len": 96,
+    "predict_len": 1,
+    "target_file": "D:\\Repository\\Photovoltaic-Prediction-PyQt\\fastapi-backend\\./db/user_dataset\\test01\\station01.csv"
+}

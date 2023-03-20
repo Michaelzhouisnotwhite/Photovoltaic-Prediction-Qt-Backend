@@ -101,8 +101,8 @@ def get_parser():
                         help='data loader num workers')
     parser.add_argument('--itr', type=int, default=1, help='experiments times')
     parser.add_argument('--train_epochs', type=int,
-                        default=1, help='train epochs')
-    parser.add_argument('--batch_size', type=int, default=32,
+                        default=15, help='train epochs')
+    parser.add_argument('--batch_size', type=int, default=10,
                         help='batch size of train input data')
     parser.add_argument('--patience', type=int, default=3,
                         help='early stopping patience')
@@ -148,7 +148,7 @@ def do_args(args: argparse.ArgumentParser):
     if args.is_training:
         for ii in range(args.itr):
             # setting record of experiments
-            setting = f'LWLRformer_{args.model}_{args.data}_{args.seq_len}_{args.label_len}_{args.pred_len}'
+            setting = f'LWLRformer_{args.data}_{args.seq_len}_{args.label_len}_{args.pred_len}'
             log_dir = os.path.join('./test_results', setting)
             if not os.path.exists(log_dir):
                 os.makedirs(log_dir)

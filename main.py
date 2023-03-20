@@ -61,8 +61,8 @@ def start_train(namespace: str):
         "--root_path", user_data_path,
         "--data_path", config_json["target_file"],
         "--data", namespace,
-        "--seq_len", config_json["train_seq_len"],
-        "--pred_len", config_json["predict_len"]
+        "--seq_len", str(config_json["train_seq_len"]),
+        "--pred_len", str(config_json["predict_len"])
     ])
     return {"message": "training end", "code": 200}
 
@@ -76,7 +76,7 @@ def list_dir(namespace: str):
     for file_item in os.listdir(user_data_path):
         res.append([file_item, os.path.getsize(os.path.join(user_data_path, file_item))])
     dir_list = dict(train_result=res, test_empty=[])
-    return {"code": 200, "data": dir_list}
+    return {"code": 200, "data": res}
 
 
 class DownloadFilesInfo(BaseModel):

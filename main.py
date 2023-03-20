@@ -98,7 +98,8 @@ def download_files(target_files_info: DownloadFilesInfo):
                 archive.write(os.path.join(__RESULT_DIR__, file_name), arcname=file_name)
 
     return FileResponse(path=f"{__DB_DIR__}/{target_files_info.namespace}.7z",
-                        filename=f"{target_files_info.namespace}.7z", background=os.remove(f"{__DB_DIR__}/{target_files_info.namespace}.7z"))
+                        filename=f"{target_files_info.namespace}.7z",
+                        background=os.remove(f"{__DB_DIR__}/{target_files_info.namespace}.7z"))
 
 
 @app.post("/upload-file/")

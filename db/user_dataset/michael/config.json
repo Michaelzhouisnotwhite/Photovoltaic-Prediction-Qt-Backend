@@ -1,6 +1,6 @@
 {
     "namespace": "Michael",
     "train_seq_len": 96,
-    "predict_len": 8,
+    "predict_len": 32,
     "target_file": "D:\\Repository\\Photovoltaic-Prediction-PyQt\\fastapi-backend\\./db/user_dataset\\Michael\\Michael.csv"
 }

@@ -1,6 +1,6 @@
 {
     "namespace": "Alice",
-    "train_seq_len": 120,
-    "predict_len": 60,
+    "train_seq_len": 100,
+    "predict_len": 28,
     "target_file": "D:\\Repository\\Photovoltaic-Prediction-PyQt\\fastapi-backend\\./db/user_dataset\\Alice\\Alice.csv"
 }
